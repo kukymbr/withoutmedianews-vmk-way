@@ -11,9 +11,39 @@ import (
 )
 
 var RPC = struct {
-	AuthService struct{ Login, Logout, Profile, ChangePassword, VfsAuthToken string }
-	UserService struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }
+	CategoryService struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }
+	NewsService     struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }
+	TagService      struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }
+	AuthService     struct{ Login, Logout, Profile, ChangePassword, VfsAuthToken string }
+	UserService     struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }
 }{
+	CategoryService: struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }{
+		Count:    "count",
+		Get:      "get",
+		GetByID:  "getbyid",
+		Add:      "add",
+		Update:   "update",
+		Delete:   "delete",
+		Validate: "validate",
+	},
+	NewsService: struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }{
+		Count:    "count",
+		Get:      "get",
+		GetByID:  "getbyid",
+		Add:      "add",
+		Update:   "update",
+		Delete:   "delete",
+		Validate: "validate",
+	},
+	TagService: struct{ Count, Get, GetByID, Add, Update, Delete, Validate string }{
+		Count:    "count",
+		Get:      "get",
+		GetByID:  "getbyid",
+		Add:      "add",
+		Update:   "update",
+		Delete:   "delete",
+		Validate: "validate",
+	},
 	AuthService: struct{ Login, Logout, Profile, ChangePassword, VfsAuthToken string }{
 		Login:          "login",
 		Logout:         "logout",
@@ -30,6 +60,2432 @@ var RPC = struct {
 		Delete:   "delete",
 		Validate: "validate",
 	},
+}
+
+func (CategoryService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"Count": {
+				Description: `Count returns count Categories according to conditions in search params.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `CategorySearch`,
+						Type:        smd.Object,
+						TypeName:    "CategorySearch",
+						Properties: smd.PropertyList{
+							{
+								Name:     "id",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "title",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "sort",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "statusId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "ids",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `int`,
+					Type:        smd.Integer,
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+			"Get": {
+				Description: `Get returns а list of Categories according to conditions in search params.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `CategorySearch`,
+						Type:        smd.Object,
+						TypeName:    "CategorySearch",
+						Properties: smd.PropertyList{
+							{
+								Name:     "id",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "title",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "sort",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "statusId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "ids",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+						},
+					},
+					{
+						Name:        "viewOps",
+						Optional:    true,
+						Description: `ViewOps`,
+						Type:        smd.Object,
+						TypeName:    "ViewOps",
+						Properties: smd.PropertyList{
+							{
+								Name:        "page",
+								Description: `page number, default - 1`,
+								Type:        smd.Integer,
+							},
+							{
+								Name:        "pageSize",
+								Description: `items count per page, max - 500`,
+								Type:        smd.Integer,
+							},
+							{
+								Name:        "sortColumn",
+								Description: `sort by column name`,
+								Type:        smd.String,
+							},
+							{
+								Name:        "sortDesc",
+								Description: `descending sort`,
+								Type:        smd.Boolean,
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `[]CategorySummary`,
+					Type:        smd.Array,
+					TypeName:    "[]CategorySummary",
+					Items: map[string]string{
+						"$ref": "#/definitions/CategorySummary",
+					},
+					Definitions: map[string]smd.Definition{
+						"CategorySummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name:     "sort",
+									Optional: true,
+									Type:     smd.Integer,
+								},
+								{
+									Name:     "status",
+									Optional: true,
+									Ref:      "#/definitions/Status",
+									Type:     smd.Object,
+								},
+							},
+						},
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+			"GetByID": {
+				Description: `GetByID returns a Category by its ID.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `int`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `Category`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "Category",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name:     "sort",
+							Optional: true,
+							Type:     smd.Integer,
+						},
+						{
+							Name: "statusId",
+							Type: smd.Integer,
+						},
+						{
+							Name:     "status",
+							Optional: true,
+							Ref:      "#/definitions/Status",
+							Type:     smd.Object,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					404: "Not Found",
+				},
+			},
+			"Add": {
+				Description: `Add adds a Category from the query.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "category",
+						Description: `Category`,
+						Type:        smd.Object,
+						TypeName:    "Category",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "title",
+								Type: smd.String,
+							},
+							{
+								Name:     "sort",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `Category`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "Category",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name:     "sort",
+							Optional: true,
+							Type:     smd.Integer,
+						},
+						{
+							Name: "statusId",
+							Type: smd.Integer,
+						},
+						{
+							Name:     "status",
+							Optional: true,
+							Ref:      "#/definitions/Status",
+							Type:     smd.Object,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+				},
+			},
+			"Update": {
+				Description: `Update updates the Category data identified by id from the query.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:     "category",
+						Type:     smd.Object,
+						TypeName: "Category",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "title",
+								Type: smd.String,
+							},
+							{
+								Name:     "sort",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `Category`,
+					Type:        smd.Boolean,
+					TypeName:    "Category",
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+					404: "Not Found",
+				},
+			},
+			"Delete": {
+				Description: `Delete deletes the Category by its ID.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `int`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `isDeleted`,
+					Type:        smd.Boolean,
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+					404: "Not Found",
+				},
+			},
+			"Validate": {
+				Description: `Validate verifies that Category data is valid.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "category",
+						Description: `Category`,
+						Type:        smd.Object,
+						TypeName:    "Category",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "title",
+								Type: smd.String,
+							},
+							{
+								Name:     "sort",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `[]FieldError`,
+					Type:        smd.Array,
+					TypeName:    "[]FieldError",
+					Items: map[string]string{
+						"$ref": "#/definitions/FieldError",
+					},
+					Definitions: map[string]smd.Definition{
+						"FieldError": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "field",
+									Type: smd.String,
+								},
+								{
+									Name: "error",
+									Type: smd.String,
+								},
+								{
+									Name:        "constraint",
+									Optional:    true,
+									Description: `Help with generating an error message.`,
+									Ref:         "#/definitions/FieldErrorConstraint",
+									Type:        smd.Object,
+								},
+							},
+						},
+						"FieldErrorConstraint": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name:        "max",
+									Description: `Max value for field.`,
+									Type:        smd.Integer,
+								},
+								{
+									Name:        "min",
+									Description: `Min value for field.`,
+									Type:        smd.Integer,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s CategoryService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+	var err error
+
+	switch method {
+	case RPC.CategoryService.Count:
+		var args = struct {
+			Search *CategorySearch `json:"search"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"search"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Count(ctx, args.Search))
+
+	case RPC.CategoryService.Get:
+		var args = struct {
+			Search  *CategorySearch `json:"search"`
+			ViewOps *ViewOps        `json:"viewOps"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"search", "viewOps"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Get(ctx, args.Search, args.ViewOps))
+
+	case RPC.CategoryService.GetByID:
+		var args = struct {
+			Id int `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.GetByID(ctx, args.Id))
+
+	case RPC.CategoryService.Add:
+		var args = struct {
+			Category Category `json:"category"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"category"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Add(ctx, args.Category))
+
+	case RPC.CategoryService.Update:
+		var args = struct {
+			Category Category `json:"category"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"category"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Update(ctx, args.Category))
+
+	case RPC.CategoryService.Delete:
+		var args = struct {
+			Id int `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Delete(ctx, args.Id))
+
+	case RPC.CategoryService.Validate:
+		var args = struct {
+			Category Category `json:"category"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"category"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Validate(ctx, args.Category))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
+}
+
+func (NewsService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"Count": {
+				Description: `Count returns count News according to conditions in search params.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `NewsSearch`,
+						Type:        smd.Object,
+						TypeName:    "NewsSearch",
+						Properties: smd.PropertyList{
+							{
+								Name:     "id",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "title",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "shortText",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "content",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "author",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "categoryId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "publishedAt",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "createdAt",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "statusId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "ids",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+							{
+								Name:     "tagId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "publishedBefore",
+								Optional: true,
+								Type:     smd.String,
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `int`,
+					Type:        smd.Integer,
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+			"Get": {
+				Description: `Get returns а list of News according to conditions in search params.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `NewsSearch`,
+						Type:        smd.Object,
+						TypeName:    "NewsSearch",
+						Properties: smd.PropertyList{
+							{
+								Name:     "id",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "title",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "shortText",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "content",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "author",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "categoryId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "publishedAt",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "createdAt",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "statusId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "ids",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+							{
+								Name:     "tagId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "publishedBefore",
+								Optional: true,
+								Type:     smd.String,
+							},
+						},
+					},
+					{
+						Name:        "viewOps",
+						Optional:    true,
+						Description: `ViewOps`,
+						Type:        smd.Object,
+						TypeName:    "ViewOps",
+						Properties: smd.PropertyList{
+							{
+								Name:        "page",
+								Description: `page number, default - 1`,
+								Type:        smd.Integer,
+							},
+							{
+								Name:        "pageSize",
+								Description: `items count per page, max - 500`,
+								Type:        smd.Integer,
+							},
+							{
+								Name:        "sortColumn",
+								Description: `sort by column name`,
+								Type:        smd.String,
+							},
+							{
+								Name:        "sortDesc",
+								Description: `descending sort`,
+								Type:        smd.Boolean,
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `[]NewsSummary`,
+					Type:        smd.Array,
+					TypeName:    "[]NewsSummary",
+					Items: map[string]string{
+						"$ref": "#/definitions/NewsSummary",
+					},
+					Definitions: map[string]smd.Definition{
+						"NewsSummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name: "shortText",
+									Type: smd.String,
+								},
+								{
+									Name:     "content",
+									Optional: true,
+									Type:     smd.String,
+								},
+								{
+									Name:     "author",
+									Optional: true,
+									Type:     smd.String,
+								},
+								{
+									Name: "categoryId",
+									Type: smd.Integer,
+								},
+								{
+									Name: "publishedAt",
+									Type: smd.String,
+								},
+								{
+									Name: "createdAt",
+									Type: smd.String,
+								},
+								{
+									Name:     "category",
+									Optional: true,
+									Ref:      "#/definitions/CategorySummary",
+									Type:     smd.Object,
+								},
+								{
+									Name:     "status",
+									Optional: true,
+									Ref:      "#/definitions/Status",
+									Type:     smd.Object,
+								},
+							},
+						},
+						"CategorySummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name:     "sort",
+									Optional: true,
+									Type:     smd.Integer,
+								},
+								{
+									Name:     "status",
+									Optional: true,
+									Ref:      "#/definitions/Status",
+									Type:     smd.Object,
+								},
+							},
+						},
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+			"GetByID": {
+				Description: `GetByID returns a News by its ID.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `int`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `News`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "News",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name: "shortText",
+							Type: smd.String,
+						},
+						{
+							Name:     "content",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name:     "author",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name: "categoryId",
+							Type: smd.Integer,
+						},
+						{
+							Name: "tagIds",
+							Type: smd.Array,
+							Items: map[string]string{
+								"type": smd.Integer,
+							},
+						},
+						{
+							Name: "publishedAt",
+							Type: smd.String,
+						},
+						{
+							Name: "createdAt",
+							Type: smd.String,
+						},
+						{
+							Name: "statusId",
+							Type: smd.Integer,
+						},
+						{
+							Name:     "category",
+							Optional: true,
+							Ref:      "#/definitions/CategorySummary",
+							Type:     smd.Object,
+						},
+						{
+							Name:     "status",
+							Optional: true,
+							Ref:      "#/definitions/Status",
+							Type:     smd.Object,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"CategorySummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name:     "sort",
+									Optional: true,
+									Type:     smd.Integer,
+								},
+								{
+									Name:     "status",
+									Optional: true,
+									Ref:      "#/definitions/Status",
+									Type:     smd.Object,
+								},
+							},
+						},
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					404: "Not Found",
+				},
+			},
+			"Add": {
+				Description: `Add adds a News from the query.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "news",
+						Description: `News`,
+						Type:        smd.Object,
+						TypeName:    "News",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "title",
+								Type: smd.String,
+							},
+							{
+								Name: "shortText",
+								Type: smd.String,
+							},
+							{
+								Name:     "content",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "author",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name: "categoryId",
+								Type: smd.Integer,
+							},
+							{
+								Name: "tagIds",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+							{
+								Name: "publishedAt",
+								Type: smd.String,
+							},
+							{
+								Name: "createdAt",
+								Type: smd.String,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "category",
+								Optional: true,
+								Ref:      "#/definitions/CategorySummary",
+								Type:     smd.Object,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"CategorySummary": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+									{
+										Name:     "sort",
+										Optional: true,
+										Type:     smd.Integer,
+									},
+									{
+										Name:     "status",
+										Optional: true,
+										Ref:      "#/definitions/Status",
+										Type:     smd.Object,
+									},
+								},
+							},
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `News`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "News",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name: "shortText",
+							Type: smd.String,
+						},
+						{
+							Name:     "content",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name:     "author",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name: "categoryId",
+							Type: smd.Integer,
+						},
+						{
+							Name: "tagIds",
+							Type: smd.Array,
+							Items: map[string]string{
+								"type": smd.Integer,
+							},
+						},
+						{
+							Name: "publishedAt",
+							Type: smd.String,
+						},
+						{
+							Name: "createdAt",
+							Type: smd.String,
+						},
+						{
+							Name: "statusId",
+							Type: smd.Integer,
+						},
+						{
+							Name:     "category",
+							Optional: true,
+							Ref:      "#/definitions/CategorySummary",
+							Type:     smd.Object,
+						},
+						{
+							Name:     "status",
+							Optional: true,
+							Ref:      "#/definitions/Status",
+							Type:     smd.Object,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"CategorySummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name:     "sort",
+									Optional: true,
+									Type:     smd.Integer,
+								},
+								{
+									Name:     "status",
+									Optional: true,
+									Ref:      "#/definitions/Status",
+									Type:     smd.Object,
+								},
+							},
+						},
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+				},
+			},
+			"Update": {
+				Description: `Update updates the News data identified by id from the query.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:     "news",
+						Type:     smd.Object,
+						TypeName: "News",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "title",
+								Type: smd.String,
+							},
+							{
+								Name: "shortText",
+								Type: smd.String,
+							},
+							{
+								Name:     "content",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "author",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name: "categoryId",
+								Type: smd.Integer,
+							},
+							{
+								Name: "tagIds",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+							{
+								Name: "publishedAt",
+								Type: smd.String,
+							},
+							{
+								Name: "createdAt",
+								Type: smd.String,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "category",
+								Optional: true,
+								Ref:      "#/definitions/CategorySummary",
+								Type:     smd.Object,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"CategorySummary": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+									{
+										Name:     "sort",
+										Optional: true,
+										Type:     smd.Integer,
+									},
+									{
+										Name:     "status",
+										Optional: true,
+										Ref:      "#/definitions/Status",
+										Type:     smd.Object,
+									},
+								},
+							},
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `News`,
+					Type:        smd.Boolean,
+					TypeName:    "News",
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+					404: "Not Found",
+				},
+			},
+			"Delete": {
+				Description: `Delete deletes the News by its ID.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `int`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `isDeleted`,
+					Type:        smd.Boolean,
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+					404: "Not Found",
+				},
+			},
+			"Validate": {
+				Description: `Validate verifies that News data is valid.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "news",
+						Description: `News`,
+						Type:        smd.Object,
+						TypeName:    "News",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "title",
+								Type: smd.String,
+							},
+							{
+								Name: "shortText",
+								Type: smd.String,
+							},
+							{
+								Name:     "content",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "author",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name: "categoryId",
+								Type: smd.Integer,
+							},
+							{
+								Name: "tagIds",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+							{
+								Name: "publishedAt",
+								Type: smd.String,
+							},
+							{
+								Name: "createdAt",
+								Type: smd.String,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "category",
+								Optional: true,
+								Ref:      "#/definitions/CategorySummary",
+								Type:     smd.Object,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"CategorySummary": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+									{
+										Name:     "sort",
+										Optional: true,
+										Type:     smd.Integer,
+									},
+									{
+										Name:     "status",
+										Optional: true,
+										Ref:      "#/definitions/Status",
+										Type:     smd.Object,
+									},
+								},
+							},
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `[]FieldError`,
+					Type:        smd.Array,
+					TypeName:    "[]FieldError",
+					Items: map[string]string{
+						"$ref": "#/definitions/FieldError",
+					},
+					Definitions: map[string]smd.Definition{
+						"FieldError": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "field",
+									Type: smd.String,
+								},
+								{
+									Name: "error",
+									Type: smd.String,
+								},
+								{
+									Name:        "constraint",
+									Optional:    true,
+									Description: `Help with generating an error message.`,
+									Ref:         "#/definitions/FieldErrorConstraint",
+									Type:        smd.Object,
+								},
+							},
+						},
+						"FieldErrorConstraint": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name:        "max",
+									Description: `Max value for field.`,
+									Type:        smd.Integer,
+								},
+								{
+									Name:        "min",
+									Description: `Min value for field.`,
+									Type:        smd.Integer,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s NewsService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+	var err error
+
+	switch method {
+	case RPC.NewsService.Count:
+		var args = struct {
+			Search *NewsSearch `json:"search"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"search"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Count(ctx, args.Search))
+
+	case RPC.NewsService.Get:
+		var args = struct {
+			Search  *NewsSearch `json:"search"`
+			ViewOps *ViewOps    `json:"viewOps"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"search", "viewOps"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Get(ctx, args.Search, args.ViewOps))
+
+	case RPC.NewsService.GetByID:
+		var args = struct {
+			Id int `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.GetByID(ctx, args.Id))
+
+	case RPC.NewsService.Add:
+		var args = struct {
+			News News `json:"news"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"news"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Add(ctx, args.News))
+
+	case RPC.NewsService.Update:
+		var args = struct {
+			News News `json:"news"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"news"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Update(ctx, args.News))
+
+	case RPC.NewsService.Delete:
+		var args = struct {
+			Id int `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Delete(ctx, args.Id))
+
+	case RPC.NewsService.Validate:
+		var args = struct {
+			News News `json:"news"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"news"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Validate(ctx, args.News))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
+}
+
+func (TagService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"Count": {
+				Description: `Count returns count Tags according to conditions in search params.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `TagSearch`,
+						Type:        smd.Object,
+						TypeName:    "TagSearch",
+						Properties: smd.PropertyList{
+							{
+								Name:     "id",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "name",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "statusId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "ids",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `int`,
+					Type:        smd.Integer,
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+			"Get": {
+				Description: `Get returns а list of Tags according to conditions in search params.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `TagSearch`,
+						Type:        smd.Object,
+						TypeName:    "TagSearch",
+						Properties: smd.PropertyList{
+							{
+								Name:     "id",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name:     "name",
+								Optional: true,
+								Type:     smd.String,
+							},
+							{
+								Name:     "statusId",
+								Optional: true,
+								Type:     smd.Integer,
+							},
+							{
+								Name: "ids",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.Integer,
+								},
+							},
+						},
+					},
+					{
+						Name:        "viewOps",
+						Optional:    true,
+						Description: `ViewOps`,
+						Type:        smd.Object,
+						TypeName:    "ViewOps",
+						Properties: smd.PropertyList{
+							{
+								Name:        "page",
+								Description: `page number, default - 1`,
+								Type:        smd.Integer,
+							},
+							{
+								Name:        "pageSize",
+								Description: `items count per page, max - 500`,
+								Type:        smd.Integer,
+							},
+							{
+								Name:        "sortColumn",
+								Description: `sort by column name`,
+								Type:        smd.String,
+							},
+							{
+								Name:        "sortDesc",
+								Description: `descending sort`,
+								Type:        smd.Boolean,
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `[]TagSummary`,
+					Type:        smd.Array,
+					TypeName:    "[]TagSummary",
+					Items: map[string]string{
+						"$ref": "#/definitions/TagSummary",
+					},
+					Definitions: map[string]smd.Definition{
+						"TagSummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+								{
+									Name:     "status",
+									Optional: true,
+									Ref:      "#/definitions/Status",
+									Type:     smd.Object,
+								},
+							},
+						},
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+			"GetByID": {
+				Description: `GetByID returns a Tag by its ID.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `int`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `Tag`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "Tag",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "name",
+							Type: smd.String,
+						},
+						{
+							Name: "statusId",
+							Type: smd.Integer,
+						},
+						{
+							Name:     "status",
+							Optional: true,
+							Ref:      "#/definitions/Status",
+							Type:     smd.Object,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					404: "Not Found",
+				},
+			},
+			"Add": {
+				Description: `Add adds a Tag from the query.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "tag",
+						Description: `Tag`,
+						Type:        smd.Object,
+						TypeName:    "Tag",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "name",
+								Type: smd.String,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `Tag`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "Tag",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "name",
+							Type: smd.String,
+						},
+						{
+							Name: "statusId",
+							Type: smd.Integer,
+						},
+						{
+							Name:     "status",
+							Optional: true,
+							Ref:      "#/definitions/Status",
+							Type:     smd.Object,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Status": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "alias",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+				},
+			},
+			"Update": {
+				Description: `Update updates the Tag data identified by id from the query.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:     "tag",
+						Type:     smd.Object,
+						TypeName: "Tag",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "name",
+								Type: smd.String,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `Tag`,
+					Type:        smd.Boolean,
+					TypeName:    "Tag",
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+					404: "Not Found",
+				},
+			},
+			"Delete": {
+				Description: `Delete deletes the Tag by its ID.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `int`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `isDeleted`,
+					Type:        smd.Boolean,
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+					400: "Validation Error",
+					404: "Not Found",
+				},
+			},
+			"Validate": {
+				Description: `Validate verifies that Tag data is valid.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "tag",
+						Description: `Tag`,
+						Type:        smd.Object,
+						TypeName:    "Tag",
+						Properties: smd.PropertyList{
+							{
+								Name: "id",
+								Type: smd.Integer,
+							},
+							{
+								Name: "name",
+								Type: smd.String,
+							},
+							{
+								Name: "statusId",
+								Type: smd.Integer,
+							},
+							{
+								Name:     "status",
+								Optional: true,
+								Ref:      "#/definitions/Status",
+								Type:     smd.Object,
+							},
+						},
+						Definitions: map[string]smd.Definition{
+							"Status": {
+								Type: "object",
+								Properties: smd.PropertyList{
+									{
+										Name: "id",
+										Type: smd.Integer,
+									},
+									{
+										Name: "alias",
+										Type: smd.String,
+									},
+									{
+										Name: "title",
+										Type: smd.String,
+									},
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `[]FieldError`,
+					Type:        smd.Array,
+					TypeName:    "[]FieldError",
+					Items: map[string]string{
+						"$ref": "#/definitions/FieldError",
+					},
+					Definitions: map[string]smd.Definition{
+						"FieldError": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "field",
+									Type: smd.String,
+								},
+								{
+									Name: "error",
+									Type: smd.String,
+								},
+								{
+									Name:        "constraint",
+									Optional:    true,
+									Description: `Help with generating an error message.`,
+									Ref:         "#/definitions/FieldErrorConstraint",
+									Type:        smd.Object,
+								},
+							},
+						},
+						"FieldErrorConstraint": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name:        "max",
+									Description: `Max value for field.`,
+									Type:        smd.Integer,
+								},
+								{
+									Name:        "min",
+									Description: `Min value for field.`,
+									Type:        smd.Integer,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "Internal Error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s TagService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+	var err error
+
+	switch method {
+	case RPC.TagService.Count:
+		var args = struct {
+			Search *TagSearch `json:"search"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"search"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Count(ctx, args.Search))
+
+	case RPC.TagService.Get:
+		var args = struct {
+			Search  *TagSearch `json:"search"`
+			ViewOps *ViewOps   `json:"viewOps"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"search", "viewOps"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Get(ctx, args.Search, args.ViewOps))
+
+	case RPC.TagService.GetByID:
+		var args = struct {
+			Id int `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.GetByID(ctx, args.Id))
+
+	case RPC.TagService.Add:
+		var args = struct {
+			Tag Tag `json:"tag"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"tag"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Add(ctx, args.Tag))
+
+	case RPC.TagService.Update:
+		var args = struct {
+			Tag Tag `json:"tag"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"tag"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Update(ctx, args.Tag))
+
+	case RPC.TagService.Delete:
+		var args = struct {
+			Id int `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Delete(ctx, args.Id))
+
+	case RPC.TagService.Validate:
+		var args = struct {
+			Tag Tag `json:"tag"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"tag"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Validate(ctx, args.Tag))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
 }
 
 func (AuthService) SMD() smd.ServiceInfo {
