@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/go-pg/pg/v10"
@@ -123,6 +124,15 @@ func WithJoinedIDs(ids []int, tableAlias, column string) OpFunc {
 		}
 		join := `INNER JOIN (VALUES ` + strings.Join(idsValues, ", ") + `) ids("jID") ON (?.? = "jID")`
 		q.Join(join, pg.Ident(tableAlias), pg.Ident(column))
+	}
+}
+
+func AlreadyPublished() OpFunc {
+	return func(query *orm.Query) {
+		now := time.Now()
+		search := &NewsSearch{PublishedBefore: &now}
+
+		search.Apply(query)
 	}
 }
 

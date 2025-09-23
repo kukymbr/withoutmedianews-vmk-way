@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"apisrv/pkg/db"
+	"apisrv/pkg/newsportal"
 
 	"github.com/vmkteam/embedlog"
 	zm "github.com/vmkteam/zenrpc-middleware"
@@ -21,10 +22,10 @@ var allowDebugFn = func() zm.AllowDebugFunc {
 	}
 }
 
-//go:generate zenrpc
+//go:generate go tool zenrpc
 
 // New returns new zenrpc Server.
-func New(dbo db.DB, logger embedlog.Logger, isDevel bool) zenrpc.Server {
+func New(news *newsportal.Service, dbo db.DB, logger embedlog.Logger, isDevel bool) zenrpc.Server {
 	rpc := zenrpc.NewServer(zenrpc.Options{
 		ExposeSMD: true,
 		AllowCORS: true,
@@ -47,7 +48,7 @@ func New(dbo db.DB, logger embedlog.Logger, isDevel bool) zenrpc.Server {
 
 	// services
 	rpc.RegisterAll(map[string]zenrpc.Invoker{
-		// "sample": NewSampleService(db, logger),
+		"news": NewNewsService(news),
 	})
 
 	return rpc

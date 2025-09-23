@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"apisrv/pkg/db"
+	"apisrv/pkg/newsportal"
 	"apisrv/pkg/vt"
 
 	"github.com/go-pg/pg/v10"
@@ -42,13 +43,15 @@ type App struct {
 	mon     *monitor.Monitor
 	echo    *echo.Echo
 	vtsrv   zenrpc.Server
+
+	newsService *newsportal.Service
 }
 
-func New(appName string, sl embedlog.Logger, cfg Config, db db.DB, dbc *pg.DB) *App {
+func New(appName string, sl embedlog.Logger, cfg Config, dbo db.DB, dbc *pg.DB) *App {
 	a := &App{
 		appName: appName,
 		cfg:     cfg,
-		db:      db,
+		db:      dbo,
 		dbc:     dbc,
 		echo:    echo.New(),
 		Logger:  sl,
@@ -61,6 +64,7 @@ func New(appName string, sl embedlog.Logger, cfg Config, db db.DB, dbc *pg.DB) *
 	a.echo.IPExtractor = echo.ExtractIPFromRealIPHeader(echo.TrustIPRange(mask))
 
 	// add services
+	a.newsService = newsportal.NewNewsService(db.NewNewsRepo(dbo))
 	a.vtsrv = vt.New(a.db, a.Logger, a.cfg.Server.IsDevel)
 
 	return a
