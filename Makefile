@@ -31,11 +31,10 @@ show-env:
 	@echo "PGPASSWORD=$(PGPASSWORD)"
 
 tools:
-	@go install github.com/vmkteam/mfd-generator@latest
-	@go install github.com/vmkteam/zenrpc/v2/zenrpc@latest
-	@go install github.com/vmkteam/colgen/cmd/colgen@latest
-	@curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${LINT_VERSION}
-	@go install github.com/vmkteam/pgmigrator@latest
+ifeq ($(wildcard bin/golangci-lint),)
+	@curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin ${LINT_VERSION}
+endif
+	@go mod download && go mod vendor
 
 fmt:
 	@golangci-lint fmt
@@ -82,20 +81,20 @@ NS := "NONE"
 MAPPING := "common:users;vfs:vfsFiles,vfsFolders"
 
 mfd-xml:
-	@mfd-generator xml -c "postgres://$(PGUSER):$(PGPASSWORD)@$(PGHOST):5432/$(PGDATABASE)?sslmode=disable" -m ./docs/model/apisrv.mfd -n $(MAPPING)
+	@go tool mfd-generator xml -c "postgres://$(PGUSER):$(PGPASSWORD)@$(PGHOST):5432/$(PGDATABASE)?sslmode=disable" -m ./docs/model/apisrv.mfd -n $(MAPPING)
 mfd-model:
-	@mfd-generator model -m ./docs/model/apisrv.mfd -p db -o ./pkg/db
+	@go tool mfd-generator model -m ./docs/model/apisrv.mfd -p db -o ./pkg/db
 mfd-repo: --check-ns
-	@mfd-generator repo -m ./docs/model/apisrv.mfd -p db -o ./pkg/db -n $(NS)
+	@go tool mfd-generator repo -m ./docs/model/apisrv.mfd -p db -o ./pkg/db -n $(NS)
 mfd-vt-xml:
-	@mfd-generator xml-vt -m ./docs/model/apisrv.mfd
+	@go tool mfd-generator xml-vt -m ./docs/model/apisrv.mfd
 mfd-vt-rpc: --check-ns
-	@mfd-generator vt -m docs/model/apisrv.mfd -o pkg/vt -p vt -x apisrv/pkg/db -n $(NS)
+	@go tool mfd-generator vt -m docs/model/apisrv.mfd -o pkg/vt -p vt -x apisrv/pkg/db -n $(NS)
 mfd-xml-lang:
 	#TODO: add namespaces support for xml-lang command
-	@mfd-generator xml-lang  -m ./docs/model/apisrv.mfd
+	@go tool mfd-generator xml-lang  -m ./docs/model/apisrv.mfd
 mfd-vt-template: --check-ns type-script-client
-	@mfd-generator template -m docs/model/apisrv.mfd  -o ../gold-vt/ -n $(NS)
+	@go tool mfd-generator template -m docs/model/apisrv.mfd  -o ../gold-vt/ -n $(NS)
 
 type-script-client: generate
 	@go run $(GOFLAGS) $(MAIN) -config=cfg/local.toml -ts_client > ../gold-vt/src/services/api/factory.ts

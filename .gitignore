@@ -3,3 +3,5 @@
 cfg/local.toml
 coverage.txt
 coverage.xml
+
+bin/*

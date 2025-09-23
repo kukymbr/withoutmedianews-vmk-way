@@ -2,6 +2,27 @@
 ## explicit; go 1.18
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
+# github.com/anthropics/anthropic-sdk-go v0.2.0-beta.3
+## explicit; go 1.21
+github.com/anthropics/anthropic-sdk-go
+github.com/anthropics/anthropic-sdk-go/internal
+github.com/anthropics/anthropic-sdk-go/internal/apierror
+github.com/anthropics/anthropic-sdk-go/internal/apiform
+github.com/anthropics/anthropic-sdk-go/internal/apijson
+github.com/anthropics/anthropic-sdk-go/internal/apiquery
+github.com/anthropics/anthropic-sdk-go/internal/encoding/json
+github.com/anthropics/anthropic-sdk-go/internal/encoding/json/sentinel
+github.com/anthropics/anthropic-sdk-go/internal/encoding/json/shims
+github.com/anthropics/anthropic-sdk-go/internal/param
+github.com/anthropics/anthropic-sdk-go/internal/requestconfig
+github.com/anthropics/anthropic-sdk-go/option
+github.com/anthropics/anthropic-sdk-go/packages/jsonl
+github.com/anthropics/anthropic-sdk-go/packages/pagination
+github.com/anthropics/anthropic-sdk-go/packages/param
+github.com/anthropics/anthropic-sdk-go/packages/resp
+github.com/anthropics/anthropic-sdk-go/packages/ssestream
+github.com/anthropics/anthropic-sdk-go/shared
+github.com/anthropics/anthropic-sdk-go/shared/constant
 # github.com/bbrks/go-blurhash v1.1.1
 ## explicit; go 1.12
 github.com/bbrks/go-blurhash
@@ -12,10 +33,25 @@ github.com/beorn7/perks/quantile
 # github.com/cespare/xxhash/v2 v2.3.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
+# github.com/chzyer/readline v1.5.1
+## explicit; go 1.15
+github.com/chzyer/readline
 # github.com/codemodus/kace v0.5.1
 ## explicit
 github.com/codemodus/kace
 github.com/codemodus/kace/ktrie
+# github.com/dizzyfool/genna v1.2.0
+## explicit; go 1.18
+github.com/dizzyfool/genna/generators/base
+github.com/dizzyfool/genna/lib
+github.com/dizzyfool/genna/model
+github.com/dizzyfool/genna/util
+# github.com/fatih/camelcase v1.0.0
+## explicit
+github.com/fatih/camelcase
+# github.com/fatih/color v1.15.0
+## explicit; go 1.17
+github.com/fatih/color
 # github.com/gabriel-vasile/mimetype v1.4.9
 ## explicit; go 1.23.0
 github.com/gabriel-vasile/mimetype
@@ -33,6 +69,14 @@ github.com/getsentry/sentry-go/internal/ratelimit
 # github.com/getsentry/sentry-go/echo v0.35.0
 ## explicit; go 1.21
 github.com/getsentry/sentry-go/echo
+# github.com/go-deepseek/deepseek v0.8.0
+## explicit; go 1.23.4
+github.com/go-deepseek/deepseek
+github.com/go-deepseek/deepseek/client
+github.com/go-deepseek/deepseek/config
+github.com/go-deepseek/deepseek/internal
+github.com/go-deepseek/deepseek/request
+github.com/go-deepseek/deepseek/response
 # github.com/go-pg/pg/v10 v10.14.0
 ## explicit; go 1.19
 github.com/go-pg/pg/v10
@@ -77,12 +121,17 @@ github.com/hypnoglow/go-pg-monitor/gopgv10
 # github.com/iancoleman/orderedmap v0.3.0
 ## explicit; go 1.16
 github.com/iancoleman/orderedmap
+# github.com/inconshreveable/mousetrap v1.1.0
+## explicit; go 1.18
+github.com/inconshreveable/mousetrap
 # github.com/jinzhu/inflection v1.0.0
 ## explicit
 github.com/jinzhu/inflection
 # github.com/jtolds/gls v4.20.0+incompatible
 ## explicit
 github.com/jtolds/gls
+# github.com/kr/text v0.2.0
+## explicit
 # github.com/labstack/echo/v4 v4.13.4
 ## explicit; go 1.23.0
 github.com/labstack/echo/v4
@@ -99,6 +148,11 @@ github.com/leodido/go-urn/scim/schema
 # github.com/lmittmann/tint v1.1.2
 ## explicit; go 1.21
 github.com/lmittmann/tint
+# github.com/manifoldco/promptui v0.9.0
+## explicit; go 1.12
+github.com/manifoldco/promptui
+github.com/manifoldco/promptui/list
+github.com/manifoldco/promptui/screenbuf
 # github.com/mattn/go-colorable v0.1.14
 ## explicit; go 1.18
 github.com/mattn/go-colorable
@@ -111,6 +165,10 @@ github.com/munnerz/goautoneg
 # github.com/namsral/flag v1.7.4-pre
 ## explicit
 github.com/namsral/flag
+# github.com/onsi/ginkgo v1.16.4
+## explicit; go 1.15
+# github.com/onsi/gomega v1.19.0
+## explicit; go 1.18
 # github.com/prometheus/client_golang v1.23.0
 ## explicit; go 1.23.0
 github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil
@@ -131,6 +189,11 @@ github.com/prometheus/common/model
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
+# github.com/rodaine/table v1.1.0
+## explicit; go 1.14
+github.com/rodaine/table
+# github.com/rogpeppe/go-internal v1.12.0
+## explicit; go 1.20
 # github.com/smarty/assertions v1.16.0
 ## explicit; go 1.21
 github.com/smarty/assertions
@@ -142,6 +205,24 @@ github.com/smarty/assertions/internal/oglematchers
 github.com/smartystreets/goconvey/convey
 github.com/smartystreets/goconvey/convey/gotest
 github.com/smartystreets/goconvey/convey/reporting
+# github.com/spf13/cobra v1.9.1
+## explicit; go 1.15
+github.com/spf13/cobra
+# github.com/spf13/pflag v1.0.7
+## explicit; go 1.12
+github.com/spf13/pflag
+# github.com/tidwall/gjson v1.14.4
+## explicit; go 1.12
+github.com/tidwall/gjson
+# github.com/tidwall/match v1.1.1
+## explicit; go 1.15
+github.com/tidwall/match
+# github.com/tidwall/pretty v1.2.1
+## explicit; go 1.16
+github.com/tidwall/pretty
+# github.com/tidwall/sjson v1.2.5
+## explicit; go 1.14
+github.com/tidwall/sjson
 # github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc
 ## explicit
 github.com/tmthrgd/go-hex
@@ -168,12 +249,35 @@ github.com/vmihailenco/tagparser/internal/parser
 github.com/vmihailenco/tagparser/v2
 github.com/vmihailenco/tagparser/v2/internal
 github.com/vmihailenco/tagparser/v2/internal/parser
+# github.com/vmkteam/colgen v0.1.2
+## explicit; go 1.23.4
+github.com/vmkteam/colgen/cmd/colgen
+github.com/vmkteam/colgen/pkg/colgen
 # github.com/vmkteam/embedlog v0.1.3
 ## explicit; go 1.24.5
 github.com/vmkteam/embedlog
 # github.com/vmkteam/meta-schema/v2 v2.0.1
 ## explicit; go 1.13
 github.com/vmkteam/meta-schema/v2
+# github.com/vmkteam/mfd-generator v0.5.1
+## explicit; go 1.24
+github.com/vmkteam/mfd-generator
+github.com/vmkteam/mfd-generator/api
+github.com/vmkteam/mfd-generator/api/dartclient
+github.com/vmkteam/mfd-generator/cmd
+github.com/vmkteam/mfd-generator/generators/model
+github.com/vmkteam/mfd-generator/generators/repo
+github.com/vmkteam/mfd-generator/generators/vt
+github.com/vmkteam/mfd-generator/generators/vt-template
+github.com/vmkteam/mfd-generator/generators/xml
+github.com/vmkteam/mfd-generator/generators/xml-lang
+github.com/vmkteam/mfd-generator/generators/xml-vt
+github.com/vmkteam/mfd-generator/mfd
+# github.com/vmkteam/pgmigrator v0.3.1
+## explicit; go 1.20
+github.com/vmkteam/pgmigrator
+github.com/vmkteam/pgmigrator/pkg/app
+github.com/vmkteam/pgmigrator/pkg/migrator
 # github.com/vmkteam/rpcgen/v2 v2.4.4
 ## explicit; go 1.19
 github.com/vmkteam/rpcgen/v2
@@ -197,7 +301,9 @@ github.com/vmkteam/zenrpc-middleware
 # github.com/vmkteam/zenrpc/v2 v2.2.12
 ## explicit; go 1.18
 github.com/vmkteam/zenrpc/v2
+github.com/vmkteam/zenrpc/v2/parser
 github.com/vmkteam/zenrpc/v2/smd
+github.com/vmkteam/zenrpc/v2/zenrpc
 # go.uber.org/atomic v1.11.0
 ## explicit; go 1.18
 go.uber.org/atomic
@@ -209,6 +315,9 @@ golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/sha3
+# golang.org/x/mod v0.25.0
+## explicit; go 1.23.0
+golang.org/x/mod/semver
 # golang.org/x/net v0.42.0
 ## explicit; go 1.23.0
 golang.org/x/net/html
@@ -219,6 +328,9 @@ golang.org/x/net/http2/h2c
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
+# golang.org/x/sync v0.16.0
+## explicit; go 1.23.0
+golang.org/x/sync/errgroup
 # golang.org/x/sys v0.34.0
 ## explicit; go 1.23.0
 golang.org/x/sys/cpu
@@ -240,6 +352,25 @@ golang.org/x/text/unicode/norm
 # golang.org/x/time v0.11.0
 ## explicit; go 1.23.0
 golang.org/x/time/rate
+# golang.org/x/tools v0.34.0
+## explicit; go 1.23.0
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/packages
+golang.org/x/tools/go/types/objectpath
+golang.org/x/tools/go/types/typeutil
+golang.org/x/tools/internal/aliases
+golang.org/x/tools/internal/event
+golang.org/x/tools/internal/event/core
+golang.org/x/tools/internal/event/keys
+golang.org/x/tools/internal/event/label
+golang.org/x/tools/internal/gcimporter
+golang.org/x/tools/internal/gocommand
+golang.org/x/tools/internal/packagesinternal
+golang.org/x/tools/internal/pkgbits
+golang.org/x/tools/internal/stdlib
+golang.org/x/tools/internal/typeparams
+golang.org/x/tools/internal/typesinternal
+golang.org/x/tools/internal/versions
 # google.golang.org/protobuf v1.36.6
 ## explicit; go 1.22
 google.golang.org/protobuf/encoding/protodelim
