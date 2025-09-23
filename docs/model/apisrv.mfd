@@ -3,6 +3,7 @@
     <PackageNames>
         <string>common</string>
         <string>vfs</string>
+        <string>news</string>
     </PackageNames>
     <Languages>
         <string>ru</string>
