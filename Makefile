@@ -37,12 +37,12 @@ endif
 	@go mod download && go mod vendor
 
 fmt:
-	@golangci-lint fmt
+	@./bin/golangci-lint fmt
 
 lint:
-	@golangci-lint version
-	@golangci-lint config verify
-	@golangci-lint run
+	@./bin/golangci-lint version
+	@./bin/golangci-lint config verify
+	@./bin/golangci-lint run
 
 build:
 	@CGO_ENABLED=0 go build $(GOFLAGS) -o ${NAME} $(MAIN)
