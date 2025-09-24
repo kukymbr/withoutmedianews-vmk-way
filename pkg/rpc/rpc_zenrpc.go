@@ -72,7 +72,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 									Type: smd.String,
 								},
 								{
-									Name: "short_text",
+									Name: "shortText",
 									Type: smd.String,
 								},
 								{
@@ -143,7 +143,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 							Type: smd.String,
 						},
 						{
-							Name: "short_text",
+							Name: "shortText",
 							Type: smd.String,
 						},
 						{
@@ -363,7 +363,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 							Type: smd.String,
 						},
 						{
-							Name: "short_text",
+							Name: "shortText",
 							Type: smd.String,
 						},
 						{

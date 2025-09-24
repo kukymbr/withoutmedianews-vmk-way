@@ -136,7 +136,7 @@ func (list NewsList) SetTags(tags Tags) {
 type NewsSuggestion struct {
 	Title      string   `validate:"required,min=3,max=255" json:"title"`
 	Text       string   `validate:"required" json:"text"`
-	ShortText  string   `validate:"required,max=255" json:"short_text"`
+	ShortText  string   `validate:"required,max=255" json:"shortText"`
 	Tags       []string `validate:"required,dive,alphanumunicode" json:"tags"`
 	CategoryID int      `validate:"required" json:"categoryId"`
 }

@@ -110,10 +110,7 @@ func (s *Service) ValidateSuggestion(ctx context.Context, req NewsSuggestion) (V
 	return errs, err
 }
 
-func (s *Service) validateSuggestion(
-	ctx context.Context,
-	req NewsSuggestion,
-) (ValidationErrors, *Category, error) {
+func (s *Service) validateSuggestion(ctx context.Context, req NewsSuggestion) (ValidationErrors, *Category, error) {
 	var res ValidationErrors
 
 	catDTO, err := s.repo.CategoryByID(ctx, req.CategoryID)

@@ -31,7 +31,7 @@ type APIError struct {
 type News struct {
 	ID          int       `json:"id"`
 	Title       string    `json:"title"`
-	ShortText   string    `json:"short_text"`
+	ShortText   string    `json:"shortText"`
 	Content     *string   `json:"content"`
 	Author      *string   `json:"author"`
 	PublishedAt time.Time `json:"publishedAt"`

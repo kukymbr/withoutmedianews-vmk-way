@@ -98,9 +98,6 @@ func (ctrl NewsService) ValidateSuggestion(ctx context.Context, req NewsSuggesti
 
 func (ctrl NewsService) Suggest(ctx context.Context, req NewsSuggestion) (*News, error) {
 	dto, err := ctrl.service.Suggest(ctx, req.ToDomain())
-	if err != nil {
-		return nil, err
-	}
 
 	switch {
 	case errors.Is(err, newsportal.ErrBadRequest):
