@@ -20,7 +20,7 @@ type Service struct {
 
 func NewNewsService(dbo db.DB) *Service {
 	repo := db.NewNewsRepo(dbo).WithEnabledOnly()
-	validate := NewValidator(repo)
+	validate := NewValidator()
 
 	return &Service{
 		db:        dbo,
@@ -105,31 +105,56 @@ func (s *Service) GetTags(ctx context.Context) ([]Tag, error) {
 }
 
 func (s *Service) ValidateSuggestion(ctx context.Context, req NewsSuggestion) (ValidationErrors, error) {
-	err := s.validator.StructCtx(ctx, req)
+	errs, _, err := s.validateSuggestion(ctx, req)
+
+	return errs, err
+}
+
+func (s *Service) validateSuggestion(
+	ctx context.Context,
+	req NewsSuggestion,
+) (ValidationErrors, *Category, error) {
+	var res ValidationErrors
+
+	catDTO, err := s.repo.CategoryByID(ctx, req.CategoryID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if catDTO == nil {
+		res = append(res, ValidationError{
+			Field: "categoryId",
+			Error: "category does not exist",
+		})
+	}
+	category := NewCategory(catDTO)
+
+	err = s.validator.StructCtx(ctx, req)
 	if err == nil {
-		return nil, nil
+		return res, category, nil
 	}
 
 	var errs validator.ValidationErrors
 	if !errors.As(err, &errs) {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return NewValidationErrors(errs), nil
+	res = append(res, NewValidationErrors(errs)...)
+
+	return res, category, nil
 }
 
 func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) (*News, error) {
-	vErrs, err := s.ValidateSuggestion(ctx, suggestion)
-	if err != nil {
-		return nil, err
-	}
-	if len(vErrs) > 0 {
-		return nil, ErrBadRequest
-	}
-
 	var news *News
 
-	err = s.WithinLock(ctx, "news.Suggest", func(s *Service) error {
+	err := s.WithinLock(ctx, "news.Suggest", func(s *Service) error {
+		vErrs, category, err := s.validateSuggestion(ctx, suggestion)
+		if err != nil {
+			return err
+		}
+		if len(vErrs) > 0 {
+			return ErrBadRequest
+		}
+
 		tags, err := s.txCreateNonExistentTags(ctx, suggestion.Tags)
 		if err != nil {
 			return err
@@ -142,6 +167,7 @@ func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) (*News
 
 		news = NewNews(dto)
 		news.SetTags(tags)
+		news.Category = category
 
 		return nil
 	})
@@ -149,7 +175,7 @@ func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) (*News
 		return nil, err
 	}
 
-	return s.enrichNewsWithTags(ctx, news)
+	return news, nil
 }
 
 func (s *Service) txCreateNonExistentTags(ctx context.Context, names []string) (Tags, error) {

@@ -14,10 +14,10 @@ import (
 //colgen:ValidationError:MapP(newsportal.ValidationError)
 
 type NewsListReq struct {
-	CategoryID int `json:"category_id"`
-	TagID      int `json:"tag_id"`
+	CategoryID int `json:"categoryId"`
+	TagID      int `json:"tagId"`
 	Page       int `json:"page"`
-	PerPage    int `json:"per_page"`
+	PerPage    int `json:"perPage"`
 }
 
 type NewsCountResponse struct {
@@ -34,7 +34,7 @@ type News struct {
 	ShortText   string    `json:"short_text"`
 	Content     *string   `json:"content"`
 	Author      *string   `json:"author"`
-	PublishedAt time.Time `json:"published_at"`
+	PublishedAt time.Time `json:"publishedAt"`
 
 	Category *Category `json:"category"`
 	Tags     Tags      `json:"tags"`
@@ -94,7 +94,7 @@ func NewCategory(in *newsportal.Category) *Category {
 type Tag struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
-	StatusID int    `json:"status_id"`
+	StatusID int    `json:"statusId"`
 }
 
 func NewTag(in *newsportal.Tag) *Tag {

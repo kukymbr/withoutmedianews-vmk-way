@@ -35,11 +35,11 @@ func (NewsService) SMD() smd.ServiceInfo {
 						TypeName: "NewsListReq",
 						Properties: smd.PropertyList{
 							{
-								Name: "category_id",
+								Name: "categoryId",
 								Type: smd.Integer,
 							},
 							{
-								Name: "tag_id",
+								Name: "tagId",
 								Type: smd.Integer,
 							},
 							{
@@ -47,7 +47,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 								Type: smd.Integer,
 							},
 							{
-								Name: "per_page",
+								Name: "perPage",
 								Type: smd.Integer,
 							},
 						},
@@ -86,7 +86,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 									Type:     smd.String,
 								},
 								{
-									Name: "published_at",
+									Name: "publishedAt",
 									Type: smd.String,
 								},
 								{
@@ -157,7 +157,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 							Type:     smd.String,
 						},
 						{
-							Name: "published_at",
+							Name: "publishedAt",
 							Type: smd.String,
 						},
 						{
@@ -201,11 +201,11 @@ func (NewsService) SMD() smd.ServiceInfo {
 						TypeName: "NewsListReq",
 						Properties: smd.PropertyList{
 							{
-								Name: "category_id",
+								Name: "categoryId",
 								Type: smd.Integer,
 							},
 							{
-								Name: "tag_id",
+								Name: "tagId",
 								Type: smd.Integer,
 							},
 							{
@@ -213,7 +213,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 								Type: smd.Integer,
 							},
 							{
-								Name: "per_page",
+								Name: "perPage",
 								Type: smd.Integer,
 							},
 						},
@@ -269,7 +269,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 									Type: smd.String,
 								},
 								{
-									Name: "status_id",
+									Name: "statusId",
 									Type: smd.Integer,
 								},
 							},
@@ -377,7 +377,7 @@ func (NewsService) SMD() smd.ServiceInfo {
 							Type:     smd.String,
 						},
 						{
-							Name: "published_at",
+							Name: "publishedAt",
 							Type: smd.String,
 						},
 						{

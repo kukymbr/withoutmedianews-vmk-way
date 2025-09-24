@@ -138,7 +138,7 @@ type NewsSuggestion struct {
 	Text       string   `validate:"required" json:"text"`
 	ShortText  string   `validate:"required,max=255" json:"short_text"`
 	Tags       []string `validate:"required,dive,alphanumunicode" json:"tags"`
-	CategoryID int      `validate:"required,category" json:"category_id"`
+	CategoryID int      `validate:"required" json:"categoryId"`
 }
 
 func (ns *NewsSuggestion) ToDB(tagIDs ...int) *db.News {
