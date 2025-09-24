@@ -6,11 +6,10 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
-	"github.com/vmkteam/vfs/db"
 )
 
 type NewsRepo struct {
-	db       db.DB
+	db       DB
 	executor orm.DB
 	filters  map[string][]Filter
 	sort     map[string][]SortField
@@ -20,6 +19,7 @@ type NewsRepo struct {
 // NewNewsRepo returns new repository
 func NewNewsRepo(db DB) NewsRepo {
 	return NewsRepo{
+		db:       db,
 		executor: db,
 		filters: map[string][]Filter{
 			Tables.Category.Name: {StatusFilter},
