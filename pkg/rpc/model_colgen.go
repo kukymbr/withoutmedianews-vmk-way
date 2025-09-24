@@ -3,7 +3,6 @@ package rpc
 
 import (
 	"apisrv/pkg/newsportal"
-	"github.com/go-playground/validator/v10"
 )
 
 type Categories []Category
@@ -68,6 +67,6 @@ func NewTags(in []newsportal.Tag) Tags { return MapP(in, NewTag) }
 
 type ValidationErrors []ValidationError
 
-func NewValidationErrors(in []validator.FieldError) ValidationErrors {
-	return Map(in, NewValidationError)
+func NewValidationErrors(in []newsportal.ValidationError) ValidationErrors {
+	return MapP(in, NewValidationError)
 }

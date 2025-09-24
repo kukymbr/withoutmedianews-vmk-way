@@ -4,16 +4,14 @@ import (
 	"time"
 
 	"apisrv/pkg/newsportal"
-
-	"github.com/go-playground/validator/v10"
 )
 
-//go:generate go tool colgen -imports=apisrv/pkg/newsportal,github.com/go-playground/validator/v10
+//go:generate go tool colgen -imports=apisrv/pkg/newsportal
 //colgen:News,Category,Tag,ValidationError
 //colgen:News:MapP(newsportal.News)
 //colgen:Category:MapP(newsportal.Category)
 //colgen:Tag:MapP(newsportal.Tag)
-//colgen:ValidationError:Map(validator.FieldError)
+//colgen:ValidationError:MapP(newsportal.ValidationError)
 
 type NewsListReq struct {
 	CategoryID int `json:"category_id"`
@@ -112,13 +110,19 @@ func NewTag(in *newsportal.Tag) *Tag {
 }
 
 type ValidationError struct {
-	Field string `json:"field"`
-	Error string `json:"error"`
+	Field      string `json:"field"`
+	Error      string `json:"error"`
+	Constraint string `json:"constraint"`
 }
 
-func NewValidationError(fieldError validator.FieldError) ValidationError {
-	return ValidationError{
-		Field: fieldError.Field(),
-		Error: fieldError.Error(),
+func NewValidationError(in *newsportal.ValidationError) *ValidationError {
+	if in == nil {
+		return nil
+	}
+
+	return &ValidationError{
+		Field:      in.Field,
+		Error:      in.Error,
+		Constraint: in.Constraint,
 	}
 }

@@ -122,11 +122,11 @@ func (list NewsList) SetTags(tags Tags) {
 }
 
 type NewsSuggestion struct {
-	Title      string   `validate:"required,min=3,max=255"`
-	Text       string   `validate:"required"`
-	ShortText  string   `validate:"required,max=255"`
-	Tags       []string `validate:"required,dive,alphanumunicode"`
-	CategoryID int      `validate:"required"`
+	Title      string   `validate:"required,min=3,max=255" json:"title"`
+	Text       string   `validate:"required" json:"text"`
+	ShortText  string   `validate:"required,max=255" json:"short_text"`
+	Tags       []string `validate:"required,dive,alphanumunicode" json:"tags"`
+	CategoryID int      `validate:"required,category" json:"category_id"`
 }
 
 func (ns *NewsSuggestion) ToDB(tagIDs ...int) *db.News {
@@ -155,4 +155,14 @@ func NewValidationError(fieldError validator.FieldError) ValidationError {
 		Field: fieldError.Field(),
 		Error: fieldError.Error(),
 	}
+}
+
+func NewValidationErrors(errs validator.ValidationErrors) ValidationErrors {
+	vErrs := make(ValidationErrors, 0, len(errs))
+
+	for _, err := range errs {
+		vErrs = append(vErrs, NewValidationError(err))
+	}
+
+	return vErrs
 }

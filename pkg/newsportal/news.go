@@ -2,6 +2,7 @@ package newsportal
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"apisrv/pkg/db"
@@ -16,11 +17,14 @@ type Service struct {
 	validator *validator.Validate
 }
 
-func NewNewsService(dbo db.DB, validator *validator.Validate) *Service {
+func NewNewsService(dbo db.DB) *Service {
+	repo := db.NewNewsRepo(dbo).WithEnabledOnly()
+	validate := NewValidator(repo)
+
 	return &Service{
 		db:        dbo,
-		repo:      db.NewNewsRepo(dbo).WithEnabledOnly(),
-		validator: validator,
+		repo:      repo,
+		validator: validate,
 	}
 }
 
@@ -89,18 +93,32 @@ func (s *Service) GetTags(ctx context.Context) ([]Tag, error) {
 	return NewTags(tags), nil
 }
 
-func (s *Service) ValidateSuggestion(ctx context.Context, req NewsSuggestion) error {
-	return s.validator.StructCtx(ctx, req)
+func (s *Service) ValidateSuggestion(ctx context.Context, req NewsSuggestion) (ValidationErrors, error) {
+	err := s.validator.StructCtx(ctx, req)
+	if err == nil {
+		return nil, nil
+	}
+
+	var errs validator.ValidationErrors
+	if !errors.As(err, &errs) {
+		return nil, err
+	}
+
+	return NewValidationErrors(errs), nil
 }
 
 func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) (*News, error) {
-	if err := s.ValidateSuggestion(ctx, suggestion); err != nil {
+	vErrs, err := s.ValidateSuggestion(ctx, suggestion)
+	if err != nil {
 		return nil, err
+	}
+	if len(vErrs) > 0 {
+		return nil, ErrBadRequest
 	}
 
 	var news *News
 
-	err := s.db.RunInLock(ctx, "news.Suggest", func(tx *pg.Tx) error {
+	err = s.db.RunInLock(ctx, "news.Suggest", func(tx *pg.Tx) error {
 		repo := s.repo.WithTransaction(tx)
 
 		tagDTOs, err := repo.CreateNonExistentTags(ctx, suggestion.Tags)
