@@ -47,7 +47,7 @@ func (ctrl NewsService) GetByID(ctx context.Context, id int) (*News, error) {
 		return nil, err
 	}
 
-	resp := NewNews(&item)
+	resp := NewNews(item)
 
 	return resp, nil
 }
@@ -100,6 +100,11 @@ func (ctrl NewsService) ValidateSuggestion(ctx context.Context, req NewsSuggesti
 	return NewValidationErrors(errs), nil
 }
 
-func (ctrl NewsService) Suggest(ctx context.Context, req NewsSuggestion) error {
-	return ctrl.service.Suggest(ctx, req.ToDomain())
+func (ctrl NewsService) Suggest(ctx context.Context, req NewsSuggestion) (*News, error) {
+	dto, err := ctrl.service.Suggest(ctx, req.ToDomain())
+	if err != nil {
+		return nil, err
+	}
+
+	return NewNews(dto), nil
 }

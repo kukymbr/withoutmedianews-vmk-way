@@ -98,3 +98,5 @@ func (ll Tags) IndexByName() map[string]Tag {
 	}
 	return r
 }
+
+type ValidationErrors []ValidationError

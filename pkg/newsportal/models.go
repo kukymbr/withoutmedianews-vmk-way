@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"apisrv/pkg/db"
+	"github.com/go-playground/validator/v10"
 )
 
 //go:generate go tool colgen -imports=apisrv/pkg/db
-//colgen:News,Category,Tag
+//colgen:News,Category,Tag,ValidationError
 //colgen:News:TagIDs,UniqueTagIDs,MapP(db.News)
 //colgen:Category:MapP(db.Category)
 //colgen:Tag:MapP(db.Tag)
@@ -66,6 +67,23 @@ type News struct {
 	Tags        Tags
 }
 
+func (news *News) SetTags(tags Tags) {
+	if len(news.TagIDs) == 0 || len(tags) == 0 {
+		return
+	}
+
+	index := tags.Index()
+
+	news.Tags = make(Tags, 0, len(news.TagIDs))
+
+	for _, id := range news.TagIDs {
+		tag, ok := index[id]
+		if ok {
+			news.Tags = append(news.Tags, tag)
+		}
+	}
+}
+
 func NewNews(in *db.News) *News {
 	if in == nil {
 		return nil
@@ -104,8 +122,37 @@ func (list NewsList) SetTags(tags Tags) {
 }
 
 type NewsSuggestion struct {
-	Title     string   `validate:"required,min=3,max=255"`
-	Text      string   `validate:"required"`
-	ShortText string   `validate:"required,max=255"`
-	Tags      []string `validate:"required,dive,alphanumunicode"`
+	Title      string   `validate:"required,min=3,max=255"`
+	Text       string   `validate:"required"`
+	ShortText  string   `validate:"required,max=255"`
+	Tags       []string `validate:"required,dive,alphanumunicode"`
+	CategoryID int      `validate:"required"`
+}
+
+func (ns *NewsSuggestion) ToDB(tagIDs ...int) *db.News {
+	if ns == nil {
+		return nil
+	}
+
+	return &db.News{
+		Title:      ns.Title,
+		ShortText:  ns.ShortText,
+		Content:    &ns.Text,
+		CategoryID: ns.CategoryID,
+		TagIDs:     tagIDs,
+		StatusID:   db.StatusDisabled,
+	}
+}
+
+type ValidationError struct {
+	Field      string `json:"field"`
+	Error      string `json:"error"`
+	Constraint string `json:"constraint"`
+}
+
+func NewValidationError(fieldError validator.FieldError) ValidationError {
+	return ValidationError{
+		Field: fieldError.Field(),
+		Error: fieldError.Error(),
+	}
 }

@@ -297,6 +297,10 @@ func (NewsService) SMD() smd.ServiceInfo {
 								Type: smd.String,
 							},
 							{
+								Name: "CategoryID",
+								Type: smd.Integer,
+							},
+							{
 								Name: "Tags",
 								Type: smd.Array,
 								Items: map[string]string{
@@ -332,12 +336,79 @@ func (NewsService) SMD() smd.ServiceInfo {
 								Type: smd.String,
 							},
 							{
+								Name: "CategoryID",
+								Type: smd.Integer,
+							},
+							{
 								Name: "Tags",
 								Type: smd.Array,
 								Items: map[string]string{
 									"type": smd.String,
 								},
 							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Optional: true,
+					Type:     smd.Object,
+					TypeName: "News",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name: "short_text",
+							Type: smd.String,
+						},
+						{
+							Name:     "content",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name:     "author",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name: "published_at",
+							Type: smd.String,
+						},
+						{
+							Name:     "category",
+							Optional: true,
+							Ref:      "#/definitions/Category",
+							Type:     smd.Object,
+						},
+						{
+							Name: "tags",
+							Ref:  "#/definitions/Tags",
+							Type: smd.Object,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Category": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+							},
+						},
+						"Tags": {
+							Type:       "object",
+							Properties: smd.PropertyList{},
 						},
 					},
 				},

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"apisrv/pkg/db"
+	"github.com/go-pg/pg/v10"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -17,6 +18,7 @@ type Service struct {
 
 func NewNewsService(dbo db.DB, validator *validator.Validate) *Service {
 	return &Service{
+		db:        dbo,
 		repo:      db.NewNewsRepo(dbo).WithEnabledOnly(),
 		validator: validator,
 	}
@@ -41,7 +43,7 @@ func (s *Service) GetList(
 	return s.enrichNewsesWithTags(ctx, NewNewsList(items))
 }
 
-func (s *Service) GetNews(ctx context.Context, id int) (News, error) {
+func (s *Service) GetNews(ctx context.Context, id int) (*News, error) {
 	dto, err := s.repo.OneNews(
 		ctx,
 		&db.NewsSearch{ID: &id},
@@ -50,19 +52,14 @@ func (s *Service) GetNews(ctx context.Context, id int) (News, error) {
 		db.WithColumns(db.Columns.News.Category),
 	)
 	if err != nil {
-		return News{}, fmt.Errorf("read news item: %w", err)
+		return nil, fmt.Errorf("read news item: %w", err)
 	}
 
 	if dto == nil {
-		return News{}, ErrNotFound
+		return nil, ErrNotFound
 	}
 
-	list, err := s.enrichNewsesWithTags(ctx, NewNewsList([]db.News{*dto}))
-	if err != nil {
-		return News{}, err
-	}
-
-	return list[0], nil
+	return s.enrichNewsWithTags(ctx, NewNews(dto))
 }
 
 func (s *Service) GetCount(ctx context.Context, filter NewsesFilter) (int, error) {
@@ -96,31 +93,51 @@ func (s *Service) ValidateSuggestion(ctx context.Context, req NewsSuggestion) er
 	return s.validator.StructCtx(ctx, req)
 }
 
-func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) error {
+func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) (*News, error) {
 	if err := s.ValidateSuggestion(ctx, suggestion); err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := s.repo.CreateNonExistentTags(ctx, suggestion.Tags); err != nil {
-		return err
-	}
+	var news *News
 
-	tagDTOs, err := s.repo.TagsByFilters(ctx, &db.TagSearch{NameIn: suggestion.Tags}, db.PagerNoLimit)
+	err := s.db.RunInLock(ctx, "news.Suggest", func(tx *pg.Tx) error {
+		repo := s.repo.WithTransaction(tx)
+
+		tagDTOs, err := repo.CreateNonExistentTags(ctx, suggestion.Tags)
+		if err != nil {
+			return err
+		}
+
+		tags := NewTags(tagDTOs)
+
+		dto, err := repo.AddNews(ctx, suggestion.ToDB(tags.IDs()...))
+		if err != nil {
+			return err
+		}
+
+		news = NewNews(dto)
+		news.SetTags(tags)
+
+		return nil
+	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	dto := db.News{
-		Title:     suggestion.Title,
-		ShortText: suggestion.ShortText,
-		Content:   &suggestion.Text,
-		TagIDs:    NewTags(tagDTOs).IDs(),
-		StatusID:  db.StatusDisabled,
+	return s.enrichNewsWithTags(ctx, news)
+}
+
+func (s *Service) enrichNewsWithTags(ctx context.Context, news *News) (*News, error) {
+	if news == nil {
+		return nil, nil
 	}
 
-	_, err = s.repo.AddNews(ctx, &dto)
+	list, err := s.enrichNewsesWithTags(ctx, NewsList{*news})
+	if err != nil {
+		return nil, err
+	}
 
-	return err
+	return &list[0], nil
 }
 
 func (s *Service) enrichNewsesWithTags(ctx context.Context, newses NewsList) (NewsList, error) {

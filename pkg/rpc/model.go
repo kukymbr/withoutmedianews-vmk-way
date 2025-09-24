@@ -60,18 +60,20 @@ func NewNews(in *newsportal.News) *News {
 }
 
 type NewsSuggestion struct {
-	Title     string
-	Text      string
-	ShortText string
-	Tags      []string
+	Title      string
+	Text       string
+	ShortText  string
+	CategoryID int
+	Tags       []string
 }
 
 func (ns NewsSuggestion) ToDomain() newsportal.NewsSuggestion {
 	return newsportal.NewsSuggestion{
-		Title:     ns.Title,
-		Text:      ns.Text,
-		ShortText: ns.ShortText,
-		Tags:      ns.Tags,
+		Title:      ns.Title,
+		Text:       ns.Text,
+		ShortText:  ns.ShortText,
+		Tags:       ns.Tags,
+		CategoryID: ns.CategoryID,
 	}
 }
 
