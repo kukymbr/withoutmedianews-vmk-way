@@ -11,6 +11,7 @@ import (
 //colgen:News:TagIDs,UniqueTagIDs,MapP(db.News)
 //colgen:Category:MapP(db.Category)
 //colgen:Tag:MapP(db.Tag)
+//colgen:Tag:Index(Name)
 
 type Tag struct {
 	ID       int
@@ -100,4 +101,11 @@ func (list NewsList) SetTags(tags Tags) {
 
 		list[i].Tags = itemTags
 	}
+}
+
+type NewsSuggestion struct {
+	Title     string   `validate:"required,min=3,max=255"`
+	Text      string   `validate:"required,min=1024"`
+	ShortText string   `validate:"required,max=255"`
+	Tags      []string `validate:"required,dive,alphanumunicode"`
 }

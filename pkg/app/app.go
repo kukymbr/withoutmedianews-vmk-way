@@ -10,6 +10,7 @@ import (
 	"apisrv/pkg/vt"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/go-playground/validator/v10"
 	monitor "github.com/hypnoglow/go-pg-monitor"
 	"github.com/labstack/echo/v4"
 	"github.com/vmkteam/embedlog"
@@ -64,7 +65,7 @@ func New(appName string, sl embedlog.Logger, cfg Config, dbo db.DB, dbc *pg.DB) 
 	a.echo.IPExtractor = echo.ExtractIPFromRealIPHeader(echo.TrustIPRange(mask))
 
 	// add services
-	a.newsService = newsportal.NewNewsService(db.NewNewsRepo(dbo))
+	a.newsService = newsportal.NewNewsService(db.NewNewsRepo(dbo), validator.New())
 	a.vtsrv = vt.New(a.db, a.Logger, a.cfg.Server.IsDevel)
 
 	return a

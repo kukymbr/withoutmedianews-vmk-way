@@ -90,3 +90,11 @@ func (ll Tags) Index() map[int]Tag {
 }
 
 func NewTags(in []db.Tag) Tags { return MapP(in, NewTag) }
+
+func (ll Tags) IndexByName() map[string]Tag {
+	r := make(map[string]Tag, len(ll))
+	for i := range ll {
+		r[ll[i].Name] = ll[i]
+	}
+	return r
+}

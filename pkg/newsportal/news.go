@@ -5,15 +5,19 @@ import (
 	"fmt"
 
 	"apisrv/pkg/db"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type Service struct {
-	repo db.NewsRepo
+	repo      db.NewsRepo
+	validator *validator.Validate
 }
 
-func NewNewsService(repo db.NewsRepo) *Service {
+func NewNewsService(repo db.NewsRepo, validator *validator.Validate) *Service {
 	return &Service{
-		repo: repo.WithEnabledOnly(),
+		repo:      repo.WithEnabledOnly(),
+		validator: validator,
 	}
 }
 
@@ -85,6 +89,71 @@ func (s *Service) GetTags(ctx context.Context) ([]Tag, error) {
 	}
 
 	return NewTags(tags), nil
+}
+
+func (s *Service) ValidateSuggestion(ctx context.Context, req NewsSuggestion) error {
+	return s.validator.StructCtx(ctx, req)
+}
+
+func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) error {
+	if err := s.ValidateSuggestion(ctx, suggestion); err != nil {
+		return err
+	}
+
+	if err := s.createNonExistentTags(ctx, suggestion.Tags); err != nil {
+		return err
+	}
+
+	tagDTOs, err := s.repo.TagsByFilters(ctx, &db.TagSearch{NameIn: suggestion.Tags}, db.PagerNoLimit)
+	if err != nil {
+		return err
+	}
+
+	dto := db.News{
+		Title:     suggestion.Title,
+		ShortText: suggestion.ShortText,
+		Content:   &suggestion.Text,
+		TagIDs:    NewTags(tagDTOs).IDs(),
+		StatusID:  db.StatusDraft,
+	}
+
+	_, err = s.repo.AddNews(ctx, &dto)
+
+	return err
+}
+
+func (s *Service) createNonExistentTags(ctx context.Context, names []string) error {
+	if len(names) == 0 {
+		return nil
+	}
+
+	// TODO: lock
+
+	dtos, err := s.repo.TagsByFilters(ctx, &db.TagSearch{NameIn: names}, db.PagerNoLimit)
+	if err != nil {
+		return err
+	}
+
+	tags := NewTags(dtos)
+	index := tags.IndexByName()
+
+	for _, name := range names {
+		if _, ok := index[name]; ok {
+			continue
+		}
+
+		dto := &db.Tag{
+			Name:     name,
+			StatusID: db.StatusPublished,
+		}
+
+		// TODO: batches?
+		if _, err := s.repo.AddTag(ctx, dto); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) enrichNewsesWithTags(ctx context.Context, newses NewsList) (NewsList, error) {

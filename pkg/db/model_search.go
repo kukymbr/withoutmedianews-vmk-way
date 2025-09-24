@@ -420,6 +420,7 @@ type TagSearch struct {
 	StatusID  *int
 	IDs       []int
 	NameILike *string
+	NameIn    []string
 }
 
 func (ts *TagSearch) Apply(query *orm.Query) *orm.Query {
@@ -440,6 +441,9 @@ func (ts *TagSearch) Apply(query *orm.Query) *orm.Query {
 	}
 	if ts.NameILike != nil {
 		Filter{Columns.Tag.Name, *ts.NameILike, SearchTypeILike, false}.Apply(query)
+	}
+	if len(ts.NameIn) > 0 {
+		Filter{Columns.Tag.Name, ts.NameIn, SearchTypeArray, false}.Apply(query)
 	}
 
 	ts.apply(query)

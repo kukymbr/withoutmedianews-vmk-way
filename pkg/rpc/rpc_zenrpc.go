@@ -11,14 +11,16 @@ import (
 )
 
 var RPC = struct {
-	NewsService struct{ Get, GetByID, Count, Categories, Tags string }
+	NewsService struct{ Get, GetByID, Count, Categories, Tags, ValidateSuggestion, Suggest string }
 }{
-	NewsService: struct{ Get, GetByID, Count, Categories, Tags string }{
-		Get:        "get",
-		GetByID:    "getbyid",
-		Count:      "count",
-		Categories: "categories",
-		Tags:       "tags",
+	NewsService: struct{ Get, GetByID, Count, Categories, Tags, ValidateSuggestion, Suggest string }{
+		Get:                "get",
+		GetByID:            "getbyid",
+		Count:              "count",
+		Categories:         "categories",
+		Tags:               "tags",
+		ValidateSuggestion: "validatesuggestion",
+		Suggest:            "suggest",
 	},
 }
 
@@ -33,19 +35,19 @@ func (NewsService) SMD() smd.ServiceInfo {
 						TypeName: "NewsListReq",
 						Properties: smd.PropertyList{
 							{
-								Name: "CategoryID",
+								Name: "category_id",
 								Type: smd.Integer,
 							},
 							{
-								Name: "TagID",
+								Name: "tag_id",
 								Type: smd.Integer,
 							},
 							{
-								Name: "Page",
+								Name: "page",
 								Type: smd.Integer,
 							},
 							{
-								Name: "PerPage",
+								Name: "per_page",
 								Type: smd.Integer,
 							},
 						},
@@ -199,19 +201,19 @@ func (NewsService) SMD() smd.ServiceInfo {
 						TypeName: "NewsListReq",
 						Properties: smd.PropertyList{
 							{
-								Name: "CategoryID",
+								Name: "category_id",
 								Type: smd.Integer,
 							},
 							{
-								Name: "TagID",
+								Name: "tag_id",
 								Type: smd.Integer,
 							},
 							{
-								Name: "Page",
+								Name: "page",
 								Type: smd.Integer,
 							},
 							{
-								Name: "PerPage",
+								Name: "per_page",
 								Type: smd.Integer,
 							},
 						},
@@ -269,6 +271,71 @@ func (NewsService) SMD() smd.ServiceInfo {
 								{
 									Name: "status_id",
 									Type: smd.Integer,
+								},
+							},
+						},
+					},
+				},
+			},
+			"ValidateSuggestion": {
+				Parameters: []smd.JSONSchema{
+					{
+						Name:     "req",
+						Type:     smd.Object,
+						TypeName: "NewsSuggestion",
+						Properties: smd.PropertyList{
+							{
+								Name: "Title",
+								Type: smd.String,
+							},
+							{
+								Name: "Text",
+								Type: smd.String,
+							},
+							{
+								Name: "ShortText",
+								Type: smd.String,
+							},
+							{
+								Name: "Tags",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.String,
+								},
+							},
+						},
+					},
+				},
+				Returns: smd.JSONSchema{
+					Type:       smd.Object,
+					TypeName:   "ValidationErrors",
+					Properties: smd.PropertyList{},
+				},
+			},
+			"Suggest": {
+				Parameters: []smd.JSONSchema{
+					{
+						Name:     "req",
+						Type:     smd.Object,
+						TypeName: "NewsSuggestion",
+						Properties: smd.PropertyList{
+							{
+								Name: "Title",
+								Type: smd.String,
+							},
+							{
+								Name: "Text",
+								Type: smd.String,
+							},
+							{
+								Name: "ShortText",
+								Type: smd.String,
+							},
+							{
+								Name: "Tags",
+								Type: smd.Array,
+								Items: map[string]string{
+									"type": smd.String,
 								},
 							},
 						},
@@ -347,6 +414,44 @@ func (s NewsService) Invoke(ctx context.Context, method string, params json.RawM
 
 	case RPC.NewsService.Tags:
 		resp.Set(s.Tags(ctx))
+
+	case RPC.NewsService.ValidateSuggestion:
+		var args = struct {
+			Req NewsSuggestion `json:"req"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"req"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.ValidateSuggestion(ctx, args.Req))
+
+	case RPC.NewsService.Suggest:
+		var args = struct {
+			Req NewsSuggestion `json:"req"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"req"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Suggest(ctx, args.Req))
 
 	default:
 		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)

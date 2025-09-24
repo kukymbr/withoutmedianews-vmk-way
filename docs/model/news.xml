@@ -45,6 +45,7 @@
             <Searches>
                 <Search Name="IDs" AttrName="ID" SearchType="SEARCHTYPE_ARRAY"></Search>
                 <Search Name="NameILike" AttrName="Name" SearchType="SEARCHTYPE_ILIKE"></Search>
+                <Search Name="NameIn" AttrName="Name" SearchType="SEARCHTYPE_ARRAY"></Search>
             </Searches>
         </Entity>
     </Entities>

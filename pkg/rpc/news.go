@@ -2,9 +2,11 @@ package rpc
 
 import (
 	"context"
+	"errors"
 
 	"apisrv/pkg/newsportal"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/vmkteam/zenrpc/v2"
 )
 
@@ -82,4 +84,22 @@ func (ctrl NewsService) Tags(ctx context.Context) ([]Tag, error) {
 	resp := NewTags(tags)
 
 	return resp, nil
+}
+
+func (ctrl NewsService) ValidateSuggestion(ctx context.Context, req NewsSuggestion) (ValidationErrors, error) {
+	err := ctrl.service.ValidateSuggestion(ctx, req.ToDomain())
+	if err == nil {
+		return nil, nil
+	}
+
+	var errs validator.ValidationErrors
+	if !errors.As(err, &errs) {
+		return nil, err
+	}
+
+	return NewValidationErrors(errs), nil
+}
+
+func (ctrl NewsService) Suggest(ctx context.Context, req NewsSuggestion) error {
+	return ctrl.service.Suggest(ctx, req.ToDomain())
 }
