@@ -15,6 +15,7 @@ type Service struct {
 	db        db.DB
 	repo      db.NewsRepo
 	validator *validator.Validate
+	activeTx  *pg.Tx
 }
 
 func NewNewsService(dbo db.DB) *Service {
@@ -26,6 +27,16 @@ func NewNewsService(dbo db.DB) *Service {
 		repo:      repo,
 		validator: validate,
 	}
+}
+
+func (s *Service) WithinLock(ctx context.Context, lockName string, fn func(*Service) error) error {
+	return s.db.RunInLock(ctx, lockName, func(tx *pg.Tx) error {
+		locked := NewNewsService(s.db)
+		locked.repo = locked.repo.WithTransaction(tx)
+		locked.activeTx = tx
+
+		return fn(locked)
+	})
 }
 
 func (s *Service) GetList(
@@ -118,17 +129,13 @@ func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) (*News
 
 	var news *News
 
-	err = s.db.RunInLock(ctx, "news.Suggest", func(tx *pg.Tx) error {
-		repo := s.repo.WithTransaction(tx)
-
-		tagDTOs, err := repo.CreateNonExistentTags(ctx, suggestion.Tags)
+	err = s.WithinLock(ctx, "news.Suggest", func(s *Service) error {
+		tags, err := s.txCreateNonExistentTags(ctx, suggestion.Tags)
 		if err != nil {
 			return err
 		}
 
-		tags := NewTags(tagDTOs)
-
-		dto, err := repo.AddNews(ctx, suggestion.ToDB(tags.IDs()...))
+		dto, err := s.repo.AddNews(ctx, suggestion.ToDB(tags.IDs()...))
 		if err != nil {
 			return err
 		}
@@ -143,6 +150,44 @@ func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) (*News
 	}
 
 	return s.enrichNewsWithTags(ctx, news)
+}
+
+func (s *Service) txCreateNonExistentTags(ctx context.Context, names []string) (Tags, error) {
+	if err := s.requireTx(); err != nil {
+		return nil, err
+	}
+
+	if len(names) == 0 {
+		return nil, nil
+	}
+
+	tags, err := s.repo.TagsByFilters(ctx, &db.TagSearch{NameIn: names}, db.PagerNoLimit)
+	if err != nil && !errors.Is(err, pg.ErrNoRows) {
+		return nil, err
+	}
+
+	index := NewTags(tags).IndexByName()
+	res := make(Tags, 0, len(names))
+
+	for _, name := range names {
+		if tag, ok := index[name]; ok {
+			res = append(res, tag)
+
+			continue
+		}
+
+		dto, err := s.repo.AddTag(ctx, &db.Tag{
+			Name:     name,
+			StatusID: db.StatusEnabled,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, *(NewTag(dto)))
+	}
+
+	return res, nil
 }
 
 func (s *Service) enrichNewsWithTags(ctx context.Context, news *News) (*News, error) {
@@ -172,4 +217,12 @@ func (s *Service) enrichNewsesWithTags(ctx context.Context, newses NewsList) (Ne
 	newses.SetTags(NewTags(dbTags))
 
 	return newses, nil
+}
+
+func (s *Service) requireTx() error {
+	if s.activeTx == nil {
+		return errNotInTx
+	}
+
+	return nil
 }

@@ -54,7 +54,10 @@ func New(news *newsportal.Service, dbo db.DB, logger embedlog.Logger, isDevel bo
 	return rpc
 }
 
-//nolint:unused
 func newInternalError(err error) *zenrpc.Error {
 	return zenrpc.NewError(http.StatusInternalServerError, err)
+}
+
+func newBadRequestError(err error) *zenrpc.Error {
+	return zenrpc.NewError(http.StatusBadRequest, err)
 }

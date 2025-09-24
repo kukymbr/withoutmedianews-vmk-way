@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	"apisrv/pkg/newsportal"
 	"github.com/vmkteam/zenrpc/v2"
@@ -105,9 +104,9 @@ func (ctrl NewsService) Suggest(ctx context.Context, req NewsSuggestion) (*News,
 
 	switch {
 	case errors.Is(err, newsportal.ErrBadRequest):
-		return nil, zenrpc.NewError(http.StatusBadRequest, err)
+		return nil, newBadRequestError(err)
 	case err != nil:
-		return nil, err
+		return nil, newInternalError(err)
 	}
 
 	return NewNews(dto), nil

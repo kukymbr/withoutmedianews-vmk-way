@@ -32,6 +32,18 @@ func NewTag(in *db.Tag) *Tag {
 	}
 }
 
+func (tag *Tag) ToDB() *db.Tag {
+	if tag == nil {
+		return nil
+	}
+
+	return &db.Tag{
+		ID:       tag.ID,
+		Name:     tag.Name,
+		StatusID: tag.StatusID,
+	}
+}
+
 type Category struct {
 	ID       int
 	Title    string
