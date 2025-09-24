@@ -65,7 +65,7 @@ func New(appName string, sl embedlog.Logger, cfg Config, dbo db.DB, dbc *pg.DB) 
 	a.echo.IPExtractor = echo.ExtractIPFromRealIPHeader(echo.TrustIPRange(mask))
 
 	// add services
-	a.newsService = newsportal.NewNewsService(db.NewNewsRepo(dbo), validator.New())
+	a.newsService = newsportal.NewNewsService(dbo, validator.New())
 	a.vtsrv = vt.New(a.db, a.Logger, a.cfg.Server.IsDevel)
 
 	return a

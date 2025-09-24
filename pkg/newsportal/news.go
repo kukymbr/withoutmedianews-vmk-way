@@ -10,13 +10,14 @@ import (
 )
 
 type Service struct {
+	db        db.DB
 	repo      db.NewsRepo
 	validator *validator.Validate
 }
 
-func NewNewsService(repo db.NewsRepo, validator *validator.Validate) *Service {
+func NewNewsService(dbo db.DB, validator *validator.Validate) *Service {
 	return &Service{
-		repo:      repo.WithEnabledOnly(),
+		repo:      db.NewNewsRepo(dbo).WithEnabledOnly(),
 		validator: validator,
 	}
 }
@@ -100,7 +101,7 @@ func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) error 
 		return err
 	}
 
-	if err := s.createNonExistentTags(ctx, suggestion.Tags); err != nil {
+	if err := s.repo.CreateNonExistentTags(ctx, suggestion.Tags); err != nil {
 		return err
 	}
 
@@ -114,46 +115,12 @@ func (s *Service) Suggest(ctx context.Context, suggestion NewsSuggestion) error 
 		ShortText: suggestion.ShortText,
 		Content:   &suggestion.Text,
 		TagIDs:    NewTags(tagDTOs).IDs(),
-		StatusID:  db.StatusDraft,
+		StatusID:  db.StatusDisabled,
 	}
 
 	_, err = s.repo.AddNews(ctx, &dto)
 
 	return err
-}
-
-func (s *Service) createNonExistentTags(ctx context.Context, names []string) error {
-	if len(names) == 0 {
-		return nil
-	}
-
-	// TODO: lock
-
-	dtos, err := s.repo.TagsByFilters(ctx, &db.TagSearch{NameIn: names}, db.PagerNoLimit)
-	if err != nil {
-		return err
-	}
-
-	tags := NewTags(dtos)
-	index := tags.IndexByName()
-
-	for _, name := range names {
-		if _, ok := index[name]; ok {
-			continue
-		}
-
-		dto := &db.Tag{
-			Name:     name,
-			StatusID: db.StatusPublished,
-		}
-
-		// TODO: batches?
-		if _, err := s.repo.AddTag(ctx, dto); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (s *Service) enrichNewsesWithTags(ctx context.Context, newses NewsList) (NewsList, error) {

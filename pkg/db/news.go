@@ -6,19 +6,21 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
+	"github.com/vmkteam/vfs/db"
 )
 
 type NewsRepo struct {
-	db      orm.DB
-	filters map[string][]Filter
-	sort    map[string][]SortField
-	join    map[string][]string
+	db       db.DB
+	executor orm.DB
+	filters  map[string][]Filter
+	sort     map[string][]SortField
+	join     map[string][]string
 }
 
 // NewNewsRepo returns new repository
-func NewNewsRepo(db orm.DB) NewsRepo {
+func NewNewsRepo(db DB) NewsRepo {
 	return NewsRepo{
-		db: db,
+		executor: db,
 		filters: map[string][]Filter{
 			Tables.Category.Name: {StatusFilter},
 			Tables.News.Name:     {StatusFilter},
@@ -39,7 +41,7 @@ func NewNewsRepo(db orm.DB) NewsRepo {
 
 // WithTransaction is a function that wraps NewsRepo with pg.Tx transaction.
 func (nr NewsRepo) WithTransaction(tx *pg.Tx) NewsRepo {
-	nr.db = tx
+	nr.executor = tx
 	return nr
 }
 
@@ -76,7 +78,7 @@ func (nr NewsRepo) CategoryByID(ctx context.Context, id int, ops ...OpFunc) (*Ca
 // OneCategory is a function that returns one Category by filters. It could return pg.ErrMultiRows.
 func (nr NewsRepo) OneCategory(ctx context.Context, search *CategorySearch, ops ...OpFunc) (*Category, error) {
 	obj := &Category{}
-	err := buildQuery(ctx, nr.db, obj, search, nr.filters[Tables.Category.Name], PagerTwo, ops...).Select()
+	err := buildQuery(ctx, nr.executor, obj, search, nr.filters[Tables.Category.Name], PagerTwo, ops...).Select()
 
 	if errors.Is(err, pg.ErrMultiRows) {
 		return nil, err
@@ -89,18 +91,18 @@ func (nr NewsRepo) OneCategory(ctx context.Context, search *CategorySearch, ops 
 
 // CategoriesByFilters returns Category list.
 func (nr NewsRepo) CategoriesByFilters(ctx context.Context, search *CategorySearch, pager Pager, ops ...OpFunc) (categories []Category, err error) {
-	err = buildQuery(ctx, nr.db, &categories, search, nr.filters[Tables.Category.Name], pager, ops...).Select()
+	err = buildQuery(ctx, nr.executor, &categories, search, nr.filters[Tables.Category.Name], pager, ops...).Select()
 	return
 }
 
 // CountCategories returns count
 func (nr NewsRepo) CountCategories(ctx context.Context, search *CategorySearch, ops ...OpFunc) (int, error) {
-	return buildQuery(ctx, nr.db, &Category{}, search, nr.filters[Tables.Category.Name], PagerOne, ops...).Count()
+	return buildQuery(ctx, nr.executor, &Category{}, search, nr.filters[Tables.Category.Name], PagerOne, ops...).Count()
 }
 
 // AddCategory adds Category to DB.
 func (nr NewsRepo) AddCategory(ctx context.Context, category *Category, ops ...OpFunc) (*Category, error) {
-	q := nr.db.ModelContext(ctx, category)
+	q := nr.executor.ModelContext(ctx, category)
 	applyOps(q, ops...)
 	_, err := q.Insert()
 
@@ -109,7 +111,7 @@ func (nr NewsRepo) AddCategory(ctx context.Context, category *Category, ops ...O
 
 // UpdateCategory updates Category in DB.
 func (nr NewsRepo) UpdateCategory(ctx context.Context, category *Category, ops ...OpFunc) (bool, error) {
-	q := nr.db.ModelContext(ctx, category).WherePK()
+	q := nr.executor.ModelContext(ctx, category).WherePK()
 	if len(ops) == 0 {
 		q = q.ExcludeColumn(Columns.Category.ID)
 	}
@@ -149,7 +151,7 @@ func (nr NewsRepo) NewsByID(ctx context.Context, id int, ops ...OpFunc) (*News, 
 // OneNews is a function that returns one News by filters. It could return pg.ErrMultiRows.
 func (nr NewsRepo) OneNews(ctx context.Context, search *NewsSearch, ops ...OpFunc) (*News, error) {
 	obj := &News{}
-	err := buildQuery(ctx, nr.db, obj, search, nr.filters[Tables.News.Name], PagerTwo, ops...).Select()
+	err := buildQuery(ctx, nr.executor, obj, search, nr.filters[Tables.News.Name], PagerTwo, ops...).Select()
 
 	if errors.Is(err, pg.ErrMultiRows) {
 		return nil, err
@@ -162,18 +164,18 @@ func (nr NewsRepo) OneNews(ctx context.Context, search *NewsSearch, ops ...OpFun
 
 // NewsByFilters returns News list.
 func (nr NewsRepo) NewsByFilters(ctx context.Context, search *NewsSearch, pager Pager, ops ...OpFunc) (newsList []News, err error) {
-	err = buildQuery(ctx, nr.db, &newsList, search, nr.filters[Tables.News.Name], pager, ops...).Select()
+	err = buildQuery(ctx, nr.executor, &newsList, search, nr.filters[Tables.News.Name], pager, ops...).Select()
 	return
 }
 
 // CountNews returns count
 func (nr NewsRepo) CountNews(ctx context.Context, search *NewsSearch, ops ...OpFunc) (int, error) {
-	return buildQuery(ctx, nr.db, &News{}, search, nr.filters[Tables.News.Name], PagerOne, ops...).Count()
+	return buildQuery(ctx, nr.executor, &News{}, search, nr.filters[Tables.News.Name], PagerOne, ops...).Count()
 }
 
 // AddNews adds News to DB.
 func (nr NewsRepo) AddNews(ctx context.Context, news *News, ops ...OpFunc) (*News, error) {
-	q := nr.db.ModelContext(ctx, news)
+	q := nr.executor.ModelContext(ctx, news)
 	if len(ops) == 0 {
 		q = q.ExcludeColumn(Columns.News.CreatedAt)
 	}
@@ -185,7 +187,7 @@ func (nr NewsRepo) AddNews(ctx context.Context, news *News, ops ...OpFunc) (*New
 
 // UpdateNews updates News in DB.
 func (nr NewsRepo) UpdateNews(ctx context.Context, news *News, ops ...OpFunc) (bool, error) {
-	q := nr.db.ModelContext(ctx, news).WherePK()
+	q := nr.executor.ModelContext(ctx, news).WherePK()
 	if len(ops) == 0 {
 		q = q.ExcludeColumn(Columns.News.ID, Columns.News.CreatedAt)
 	}
@@ -225,7 +227,7 @@ func (nr NewsRepo) TagByID(ctx context.Context, id int, ops ...OpFunc) (*Tag, er
 // OneTag is a function that returns one Tag by filters. It could return pg.ErrMultiRows.
 func (nr NewsRepo) OneTag(ctx context.Context, search *TagSearch, ops ...OpFunc) (*Tag, error) {
 	obj := &Tag{}
-	err := buildQuery(ctx, nr.db, obj, search, nr.filters[Tables.Tag.Name], PagerTwo, ops...).Select()
+	err := buildQuery(ctx, nr.executor, obj, search, nr.filters[Tables.Tag.Name], PagerTwo, ops...).Select()
 
 	if errors.Is(err, pg.ErrMultiRows) {
 		return nil, err
@@ -238,18 +240,18 @@ func (nr NewsRepo) OneTag(ctx context.Context, search *TagSearch, ops ...OpFunc)
 
 // TagsByFilters returns Tag list.
 func (nr NewsRepo) TagsByFilters(ctx context.Context, search *TagSearch, pager Pager, ops ...OpFunc) (tags []Tag, err error) {
-	err = buildQuery(ctx, nr.db, &tags, search, nr.filters[Tables.Tag.Name], pager, ops...).Select()
+	err = buildQuery(ctx, nr.executor, &tags, search, nr.filters[Tables.Tag.Name], pager, ops...).Select()
 	return
 }
 
 // CountTags returns count
 func (nr NewsRepo) CountTags(ctx context.Context, search *TagSearch, ops ...OpFunc) (int, error) {
-	return buildQuery(ctx, nr.db, &Tag{}, search, nr.filters[Tables.Tag.Name], PagerOne, ops...).Count()
+	return buildQuery(ctx, nr.executor, &Tag{}, search, nr.filters[Tables.Tag.Name], PagerOne, ops...).Count()
 }
 
 // AddTag adds Tag to DB.
 func (nr NewsRepo) AddTag(ctx context.Context, tag *Tag, ops ...OpFunc) (*Tag, error) {
-	q := nr.db.ModelContext(ctx, tag)
+	q := nr.executor.ModelContext(ctx, tag)
 	applyOps(q, ops...)
 	_, err := q.Insert()
 
@@ -258,7 +260,7 @@ func (nr NewsRepo) AddTag(ctx context.Context, tag *Tag, ops ...OpFunc) (*Tag, e
 
 // UpdateTag updates Tag in DB.
 func (nr NewsRepo) UpdateTag(ctx context.Context, tag *Tag, ops ...OpFunc) (bool, error) {
-	q := nr.db.ModelContext(ctx, tag).WherePK()
+	q := nr.executor.ModelContext(ctx, tag).WherePK()
 	if len(ops) == 0 {
 		q = q.ExcludeColumn(Columns.Tag.ID)
 	}
