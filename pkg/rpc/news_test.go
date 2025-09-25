@@ -100,3 +100,53 @@ func TestDB_NewsService_GetByID(t *testing.T) {
 		})
 	})
 }
+
+func TestDB_NewsService_ValidateSuggestion(t *testing.T) {
+	Convey("Test NewsService ValidateSuggestion", t, func() {
+		ctx := t.Context()
+		srv := initRPC(t)
+
+		cases := []struct {
+			Name   string
+			Req    rpc.NewsSuggestion
+			Assert func(errs rpc.ValidationErrors)
+		}{
+			{
+				Name: "Valid",
+				Req: rpc.NewsSuggestion{
+					Title:      "Test",
+					Text:       "Test text",
+					ShortText:  "Test",
+					CategoryID: 1,
+					Tags:       []string{"Mascots", "test"},
+				},
+				Assert: func(errs rpc.ValidationErrors) {
+					So(errs, ShouldBeNil)
+				},
+			},
+			{
+				Name: "Invalid",
+				Req: rpc.NewsSuggestion{
+					Title:      "1",
+					Text:       "",
+					ShortText:  "",
+					CategoryID: 0,
+					Tags:       []string{"***"},
+				},
+				Assert: func(errs rpc.ValidationErrors) {
+					So(errs, ShouldNotBeNil)
+					So(errs, ShouldHaveLength, 6)
+				},
+			},
+		}
+
+		for _, testCase := range cases {
+			Convey(testCase.Name, func() {
+				errs, err := srv.ValidateSuggestion(ctx, testCase.Req)
+
+				So(err, ShouldBeNil)
+				testCase.Assert(errs)
+			})
+		}
+	})
+}
